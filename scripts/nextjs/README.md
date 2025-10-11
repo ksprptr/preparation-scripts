@@ -48,5 +48,5 @@ Invoke-WebRequest https://scripts.ksprptr.dev/nextjs/ps -OutFile prepare.ps1
 
 ## License
 
-> This script is developed by Petr Kašpar and is licensed under the MIT License.
+> This script is developed by **Petr Kašpar** and is licensed under the MIT License.
 > For more details, please refer to the LICENSE file.

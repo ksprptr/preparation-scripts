@@ -28,5 +28,5 @@ Alternatively, use the **proxy API** for direct download links:
 
 ## License
 
-> These scripts are developed by Petr Kašpar and are licensed under the MIT License.  
+> These scripts are developed by **Petr Kašpar** and are licensed under the MIT License.  
 > For more details, please refer to the LICENSE file.
