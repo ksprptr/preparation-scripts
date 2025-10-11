@@ -14,7 +14,7 @@ It is highly recommended to run this script **immediately after the first commit
 
 ## What It Does
 
-This script automates initial project setup for a Next.js + TypeScript project, including:
+This script automates initial project setup for a Next.js project, including:
 
 - Installs recommended development packages (ESLint, Prettier, Husky, TailwindCSS plugins, etc.)
 - Configures **Prettier** and **ESLint** with sensible defaults
