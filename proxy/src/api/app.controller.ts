@@ -46,7 +46,7 @@ export class AppController {
 
     const contentTypes: Record<string, string> = {
       bash: 'application/x-sh',
-      ps: 'application/x-powershell',
+      powershell: 'application/x-powershell',
     };
 
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
