@@ -1,12 +1,11 @@
 # Next.js Preparation Script
 
-> Automates initial setup for a Next.js project
+> Automates initial setup for a Next.js project  
 > **⚠️ Warning:** This script modify and delete files in your project. Run it at your own risk. Always use a clean Git state or backup. Author is not responsible for any data loss.
 
-- [When to Run](#WhentoRun)
-- [What it Does](#WhatItDoes)
-- [Usage](#Usage)
-- [License](#License)
+- [When to Run](#when-to-run)
+- [What it Does](#what-it-does)
+- [Usage](#usage)
 
 ## When to Run
 
@@ -31,7 +30,7 @@ After running, the script deletes itself automatically.
 ### Linux / macOS
 
 ```bash
-wget https://scripts.ksprptr.dev/nextjs/bash
+wget https://scripts.ksprptr.dev/nextjs/prepare.sh
 
 chmod +x prepare.sh
 
@@ -41,12 +40,7 @@ chmod +x prepare.sh
 ### Windows (PowerShell)
 
 ```bash
-Invoke-WebRequest https://scripts.ksprptr.dev/nextjs/ps -OutFile prepare.ps1
+wget https://scripts.ksprptr.dev/nextjs/powershell
 
 ./prepare.ps1
 ```
-
-## License
-
-> This script is developed by **Petr Kašpar** and is licensed under the MIT License.
-> For more details, please refer to the LICENSE file.

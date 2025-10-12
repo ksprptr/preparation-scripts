@@ -1,11 +1,11 @@
 # Project Preparation Scripts
 
-> Central repository for project preparation scripts across multiple frameworks  
+> Central repository for project preparation scripts across multiple frameworks.  
 > Automates initial setup and distribution of scripts for various environments.
 
-- [Purpose](#Purpose)
-- [How to Use](#HowtoUse)
-- [License](#License)
+- [Purpose](#purpose)
+- [How to Use](#how-to-use)
+- [License](#license)
 
 ## Purpose
 
@@ -16,13 +16,13 @@ It is intended for developers who want to quickly bootstrap projects with best p
 
 ## How to Use
 
-1. Navigate to the relevant script/framework folder (e.g., `scripts/nextjs/bash`)
+1. Navigate to the relevant script/framework folder (e.g., `scripts/nextjs`)
 2. Follow the instructions in the framework-specific `README.md` for running the preparation script.
 
 Alternatively, use the **proxy API** for direct download links:
 
-- Example Bash: `https://scripts.ksprptr.dev/nextjs/bash`
-- Example PowerShell: `https://scripts.ksprptr.dev/nextjs/ps`
+- Example Bash: `https://scripts.ksprptr.dev/nextjs/prepare.sh`
+- Example PowerShell: `https://scripts.ksprptr.dev/nextjs/prepare.ps1`
 
 > **⚠️ Warning:** Scripts modify and delete files in your project. Run them at your own risk. Always use a clean Git state or backup. Author is not responsible for any data loss.
 

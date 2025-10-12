@@ -1,1 +1,56 @@
+# compiled output
+proxy/dist
+proxy/node_modules
+proxy/build
+
+# Logs
+proxy/logs
+proxy/*.log
+proxy/npm-debug.log*
+proxy/pnpm-debug.log*
+proxy/yarn-debug.log*
+proxy/yarn-error.log*
+proxy/lerna-debug.log*
+
+# OS
 .DS_Store
+
+# Tests
+proxy/coverage
+proxy/.nyc_output
+
+# IDEs and editors
+proxy/.idea
+proxy/.project
+proxy/.classpath
+proxy/.c9/
+proxy/*.launch
+proxy/.settings/
+proxy/*.sublime-workspace
+
+# IDE - VSCode
+proxy/.vscode/*
+proxy/!.vscode/settings.json
+proxy/!.vscode/tasks.json
+proxy/!.vscode/launch.json
+proxy/!.vscode/extensions.json
+
+# dotenv environment variable files
+proxy/.env
+proxy/.env.development.local
+proxy/.env.test.local
+proxy/.env.production.local
+proxy/.env.local
+
+# temp directory
+proxy/.temp
+proxy/.tmp
+
+# Runtime data
+proxy/pids
+proxy/*.pid
+proxy/*.seed
+proxy/*.pid.lock
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+proxy/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

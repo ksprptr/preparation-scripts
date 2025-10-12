@@ -1,0 +1,5 @@
+.husky
+.prettierignore
+.stylelintignore
+coverage
+node_modules
