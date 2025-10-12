@@ -40,7 +40,7 @@ chmod +x prepare.sh
 ### Windows (PowerShell)
 
 ```bash
-wget https://scripts.ksprptr.dev/nextjs/powershell
+wget https://scripts.ksprptr.dev/nextjs/prepare.ps1
 
 ./prepare.ps1
 ```
