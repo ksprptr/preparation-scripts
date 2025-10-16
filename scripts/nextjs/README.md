@@ -40,7 +40,9 @@ chmod +x prepare.sh
 ### Windows (PowerShell)
 
 ```bash
-wget https://scripts.ksprptr.dev/nextjs/prepare.ps1
+Invoke-WebRequest -Uri "https://scripts.ksprptr.dev/nextjs/prepare.ps1" -OutFile "prepare.ps1"
 
-./prepare.ps1
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+.\prepare.ps1
 ```
