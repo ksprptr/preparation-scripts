@@ -1,35 +1,36 @@
+#!/usr/bin/env pwsh
 <#
 Next.js Preparation Script
 Description: Automates initial setup for a Next.js project
-Warning: This script modify and delete files in your project. Run it at your own risk. Always use a clean Git state or backup. Author is not responsible for any data loss.
+Warning: This script modifies and deletes files in your project. Run it at your own risk.
 Author: Petr Kašpar
 License: MIT
 #>
 
-function Run-Step {
+# --- Function: RunStep ------------------------------------------------------
+function RunStep {
     param (
         [string]$Message,
         [scriptblock]$Action
     )
 
-    Write-Host "`n▶ $Message..."
+    Write-Host "$Message..."
     try {
         & $Action | Out-Null
-        Write-Host "✅ $Message - Done!"
+        Write-Host "$Message - Done!"
     } catch {
-        Write-Host "❌ $Message - FAILED: $($_.Exception.Message)"
+        Write-Host "$Message - FAILED: $($_.Exception.Message)"
         exit 1
     }
 }
 
-# --- PRECHECKS ---
-
+# --- Check Next.js Installation ----------------------------------------------
 if (-not (Test-Path "node_modules/next")) {
-    Write-Host "❌ Not a Next.js project. Please create one first."
+    Write-Host "Not a Next.js project. Please create one first."
     exit 1
 }
 
-# Detect package manager
+# --- Detect Package Manager --------------------------------------------------
 if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     $PACKAGE_MANAGER = "pnpm"
 } elseif (Get-Command yarn -ErrorAction SilentlyContinue) {
@@ -37,20 +38,21 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
 } else {
     $PACKAGE_MANAGER = "npm"
 }
+
 Write-Host "Detected package manager: $PACKAGE_MANAGER"
 
-# Check Git repository
+# --- Check Git Repository ----------------------------------------------------
 if (-not (Test-Path ".git")) {
     Write-Host "Git repository not initialized. Skipping git checks."
     $GIT_COMMIT = "no"
 } else {
-    $changes = git status --porcelain | Select-String -NotMatch "prepare.ps1"
-    if ($changes) {
-        Write-Host "❌ You have uncommitted changes. Please commit or stash them first. (ignore prepare.ps1)"
+    $status = git status --porcelain | Select-String -NotMatch 'prepare.ps1'
+    if ($status) {
+        Write-Host "You have uncommitted changes. Please commit or stash them before running this script. (ignore prepare.ps1)"
         exit 1
     } else {
-        $choice = Read-Host "Git repository detected. Commit changes after preparation? (Y/n)"
-        if ($choice -match "^[Nn]") {
+        $choice = Read-Host "We have detected a Git repository, do you want to commit the changes after preparation? (Y/n)"
+        if ($choice -match '^[Nn]$') {
             $GIT_COMMIT = "no"
         } else {
             $GIT_COMMIT = "yes"
@@ -60,36 +62,31 @@ if (-not (Test-Path ".git")) {
 
 Clear-Host
 
-# --- STEP 1: Install dependencies ---
-
-Run-Step "Installing development packages" {
+# --- Step 1: Install dev packages --------------------------------------------
+RunStep "Installing development packages" {
     $devPackages = @(
-        "@eslint/eslintrc", "@eslint/js", "@next/eslint-plugin-next",
         "@typescript-eslint/eslint-plugin", "@typescript-eslint/parser",
-        "eslint", "eslint-config-next", "eslint-config-prettier",
-        "eslint-plugin-import", "eslint-plugin-prettier", "eslint-plugin-react",
-        "eslint-plugin-react-hooks", "eslint-plugin-simple-import-sort",
-        "eslint-plugin-unused-imports", "husky", "prettier",
-        "prettier-plugin-tailwindcss"
+        "eslint-config-prettier", "eslint-plugin-import", "eslint-plugin-prettier",
+        "eslint-plugin-react", "eslint-plugin-react-hooks", "eslint-plugin-simple-import-sort",
+        "eslint-plugin-unused-imports", "husky", "prettier", "prettier-plugin-tailwindcss"
     )
 
     if ($PACKAGE_MANAGER -eq "pnpm") {
-        pnpm add -D $devPackages
-        pnpm up --latest
+        pnpm add -D $devPackages > $null 2>&1
+        pnpm up --latest > $null 2>&1
     } elseif ($PACKAGE_MANAGER -eq "yarn") {
-        yarn add -D $devPackages
-        yarn upgrade --latest
+        yarn add -D $devPackages > $null 2>&1
+        yarn upgrade --latest > $null 2>&1
     } else {
-        npm install -D $devPackages
-        npx npm-check-updates -u
-        npm install
+        npm install -D $devPackages > $null 2>&1
+        npx npm-check-updates -u > $null 2>&1
+        npm install > $null 2>&1
     }
 }
 
-# --- STEP 2: Prettier config ---
-
-Run-Step "Configuring Prettier" {
-@"
+# --- Step 2: Prettier Config -------------------------------------------------
+RunStep "Configuring Prettier" {
+@'
 {
   "tabWidth": 2,
   "printWidth": 100,
@@ -101,9 +98,9 @@ Run-Step "Configuring Prettier" {
   "bracketSameLine": true,
   "plugins": ["prettier-plugin-tailwindcss"]
 }
-"@ | Set-Content ".prettierrc"
+'@ | Out-File .prettierrc -Encoding utf8
 
-@"
+@'
 .next
 .husky
 .prettierignore
@@ -111,49 +108,29 @@ Run-Step "Configuring Prettier" {
 coverage
 node_modules
 public
-"@ | Set-Content ".prettierignore"
+'@ | Out-File .prettierignore -Encoding utf8
 }
 
-# --- STEP 3: ESLint config ---
-
-Run-Step "Configuring ESLint" {
-@"
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
+# --- Step 3: ESLint Config ---------------------------------------------------
+RunStep "Configuring ESLint" {
+@'
+import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import { defineConfig } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
 import prettier from "eslint-plugin-prettier";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-const config = [
+export default defineConfig([
+  ...nextVitals,
   {
-    ignores: ["**/next-env.d.ts"],
-  },
-  ...compat.extends(
-    "next",
-    "next/core-web-vitals",
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
-  ),
-  {
+    languageOptions: { parser: tsParser },
     plugins: {
-      "unused-imports": unusedImports,
       prettier,
+      "unused-imports": unusedImports,
       "simple-import-sort": simpleImportSort,
-    },
-    languageOptions: {
-      parser: tsParser,
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
       semi: "error",
@@ -177,50 +154,40 @@ const config = [
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "error",
-        {
-          vars: "all",
-          varsIgnorePattern: "^_",
-          args: "after-used",
-          argsIgnorePattern: "^_"
-        }
+        { "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
       ],
       "simple-import-sort/imports": [
         "error",
-        {
-          groups: [["^\\u0000", "^@?w"], ["^@/"], ["^."], ["^.+.(css|scss)$"]]
-        }
+        { "groups": [["^\\u0000", "^@?w"], ["^@/"], ["^."], ["^.+.(css|scss)$"]] }
       ],
       "simple-import-sort/exports": "error",
       "import/no-named-as-default-member": "warn"
     }
   }
-];
-
-export default config;
-"@ | Set-Content "eslint.config.mjs"
+]);
+'@ | Out-File eslint.config.mjs -Encoding utf8
 }
 
-# --- STEP 4: Husky ---
-
-Run-Step "Configuring Husky" {
+# --- Step 4: Husky -----------------------------------------------------------
+RunStep "Configuring Husky" {
     if ($PACKAGE_MANAGER -eq "pnpm") {
-        pnpm exec husky init
+        pnpm exec husky init > $null 2>&1
     } else {
-        npx husky init
+        npx husky init > $null 2>&1
     }
+
     if (-not (Test-Path ".husky")) { New-Item -ItemType Directory -Path ".husky" | Out-Null }
-    "$PACKAGE_MANAGER lint" | Set-Content ".husky/pre-commit"
+    "$PACKAGE_MANAGER lint" | Out-File ".husky/pre-commit" -Encoding utf8
 }
 
-# --- STEP 5: Project cleanup ---
-
-Run-Step "Cleaning project structure" {
+# --- Step 5: Clean project structure ----------------------------------------
+RunStep "Cleaning project structure" {
     Remove-Item -Recurse -Force "public" -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path "src/app" -Force | Out-Null
 
 @'
 @import "tailwindcss";
-'@ | Set-Content "src/app/globals.css"
+'@ | Out-File src/app/globals.css -Encoding utf8
 
 @'
 import type { Metadata } from "next";
@@ -238,54 +205,58 @@ export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
     </html>
   );
 }
-'@ | Set-Content "src/app/layout.tsx"
+'@ | Out-File src/app/layout.tsx -Encoding utf8
 
-"export default function Page() {
+@'
+export default function Page() {
   return <>Home</>;
-}" | Set-Content "src/app/page.tsx"
-"export default function Page() {
+}
+'@ | Out-File src/app/page.tsx -Encoding utf8
+
+@'
+export default function Page() {
   return <>Not found</>;
-}" | Set-Content "src/app/not-found.tsx"
+}
+'@ | Out-File src/app/not-found.tsx -Encoding utf8
 }
 
-# --- STEP 6: .env + gitignore ---
-
-Run-Step "Updating additional files" {
-    if (-not (Select-String -Quiet "^!.env.example$" ".gitignore")) {
-        Add-Content ".gitignore" "`n!.env.example"
+# --- Step 6: Update Additional Files ----------------------------------------
+RunStep "Updating additional files" {
+    if (Test-Path ".gitignore") {
+        if (-not (Select-String -Path ".gitignore" -Pattern "^!.env.example$" -Quiet)) {
+            "`n!.env.example" | Add-Content .gitignore
+        }
     }
-@"
+
+@'
 # Example of .env file
-#
 # Copy this file content to .env and fill in the values
 # This file is used as example and should not be used in production
-"@ | Set-Content ".env.example"
+'@ | Out-File .env.example -Encoding utf8
 }
 
-# --- STEP 7: ESLint fix + scripts ---
-
-Run-Step "Fixing code using ESLint" {
+# --- Step 7: ESLint Fix -----------------------------------------------------
+RunStep "Fixing code using ESLint" {
     if ($PACKAGE_MANAGER -eq "pnpm") {
-        pnpm exec eslint "src/**/*.{ts,tsx}" --fix
+        pnpm exec eslint "src/**/*.{ts,tsx}" --fix > $null 2>&1
     } elseif ($PACKAGE_MANAGER -eq "yarn") {
-        yarn exec eslint "src/**/*.{ts,tsx}" --fix
+        yarn exec eslint "src/**/*.{ts,tsx}" --fix > $null 2>&1
     } else {
-        npx eslint "src/**/*.{ts,tsx}" --fix
+        npx eslint "src/**/*.{ts,tsx}" --fix > $null 2>&1
+    }
+
+    & npx json -I -f package.json -e 'this.scripts.lint="eslint \"src/**/*.{ts,tsx}\" --fix"' | Out-Null
+    & npx json -I -f package.json -e 'this.scripts["start:dev"]="next dev"' | Out-Null
+}
+
+# --- Step 8: Commit ----------------------------------------------------------
+if ($GIT_COMMIT -eq "yes") {
+    RunStep "Committing changes to Git" {
+        git add --all -- ":!prepare.ps1" > $null 2>&1
+        git commit -m "chore: project prepared" > $null 2>&1
     }
 }
 
-# Update package.json
-& npx json -I -f package.json -e 'this.scripts.lint="eslint \"src/**/*.{ts,tsx}\""' | Out-Null
-& npx json -I -f package.json -e 'this.scripts["start:dev"]="next dev --turbopack"' | Out-Null
-
-# --- STEP 8: Git commit ---
-
-Run-Step "Committing changes to Git" {
-    if ($GIT_COMMIT -eq "yes") {
-        git add --all -- ":!prepare.ps1" | Out-Null
-        git commit -m "chore: project prepared" | Out-Null
-    }
-}
-
-Write-Host "`n✅ Project prepared successfully!"
+# --- Finish -----------------------------------------------------------------
+Write-Host "Project prepared successfully!"
 Remove-Item $MyInvocation.MyCommand.Path -Force

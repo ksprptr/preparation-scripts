@@ -67,7 +67,7 @@ clear
 show_progress_during "Installing development packages" bash -c '
   PACKAGE_MANAGER="'"$PACKAGE_MANAGER"'"
   DEV_PACKAGES=(
-    @eslint/eslintrc @eslint/js @next/eslint-plugin-next @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint eslint-config-next eslint-config-prettier eslint-plugin-import eslint-plugin-prettier eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-simple-import-sort eslint-plugin-unused-imports husky prettier prettier-plugin-tailwindcss
+    @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-config-prettier eslint-plugin-import eslint-plugin-prettier eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-simple-import-sort eslint-plugin-unused-imports husky prettier prettier-plugin-tailwindcss
   )
 
   if [ "$PACKAGE_MANAGER" = "pnpm" ]; then
@@ -108,89 +108,70 @@ EOL
 '
 
 # Step 3: Setup ESLint config
-show_progress_during "Configuring ESLint" bash -c '
-cat > eslint.config.mjs <<EOL
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
-import tsParser from "@typescript-eslint/parser";
-import prettier from "eslint-plugin-prettier";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
-import unusedImports from "eslint-plugin-unused-imports";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+show_progress_during "Configuring ESLint" bash -c 'true'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+cat > eslint.config.mjs <<'EOL'
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import { defineConfig } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import prettier from 'eslint-plugin-prettier';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import unusedImports from 'eslint-plugin-unused-imports';
 
-const config = [
+export default defineConfig([
+  ...nextVitals,
   {
-    ignores: ["**/next-env.d.ts"],
-  },
-  ...compat.extends(
-    "next",
-    "next/core-web-vitals",
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
-  ),
-  {
-    plugins: {
-      "unused-imports": unusedImports,
-      prettier,
-      "simple-import-sort": simpleImportSort,
-    },
     languageOptions: {
       parser: tsParser,
     },
+    plugins: {
+      prettier,
+      'unused-imports': unusedImports,
+      'simple-import-sort': simpleImportSort,
+      '@typescript-eslint': tsPlugin,
+    },
     rules: {
-      semi: "error",
-      "react/no-unescaped-entities": "off",
-      "react/jsx-uses-react": "off",
-      "react/react-in-jsx-scope": "off",
-      "@typescript-eslint/no-shadow": ["error"],
-      "@typescript-eslint/no-use-before-define": ["error"],
-      "no-use-before-define": "off",
-      "no-await-in-loop": "warn",
-      "no-eval": "error",
-      "no-implied-eval": "error",
-      "prefer-promise-reject-errors": "warn",
-      "spaced-comment": "error",
-      "no-duplicate-imports": "error",
-      "no-explicit-any": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "no-unused-vars": "off",
-      "react-hooks/exhaustive-deps": "off",
-      "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": [
-        "error",
+      semi: 'error',
+      'react/no-unescaped-entities': 'off',
+      'react/jsx-uses-react': 'off',
+      'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-shadow': ['error'],
+      '@typescript-eslint/no-use-before-define': ['error'],
+      'no-use-before-define': 'off',
+      'no-await-in-loop': 'warn',
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'prefer-promise-reject-errors': 'warn',
+      'spaced-comment': 'error',
+      'no-duplicate-imports': 'error',
+      'no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-unused-vars': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'error',
         {
-          vars: "all",
-          varsIgnorePattern: "^_",
-          args: "after-used",
-          argsIgnorePattern: "^_"
-        }
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
       ],
-      "simple-import-sort/imports": [
-        "error",
+      'simple-import-sort/imports': [
+        'error',
         {
-          groups: [["^\\\\u0000", "^@?w"], ["^@/"], ["^."], ["^.+.(css|scss)$"]]
-        }
+          groups: [['^\\u0000', '^@?w'], ['^@/'], ['^.'], ['^.+.(css|scss)$']],
+        },
       ],
-      "simple-import-sort/exports": "error",
-      "import/no-named-as-default-member": "warn"
-    }
-  }
-];
-
-export default config;
+      'simple-import-sort/exports': 'error',
+      'import/no-named-as-default-member': 'warn',
+    },
+  },
+]);
 EOL
-'
 
 # Step 4: Setup Husky pre-commit
 show_progress_during "Configuring Husky" bash -c '
@@ -245,9 +226,12 @@ EOL
 
 # Step 6: Update additional files
 show_progress_during "Updating additional files" bash -c '
-if ! grep -q "^!.env.example$" .gitignore; then
-    echo -e "\n!.env.example" >> .gitignore
+if [ -f .gitignore ]; then
+    if ! grep -q "^!.env.example$" .gitignore; then
+        echo -e "\n!.env.example" >> .gitignore
+    fi
 fi
+
 cat > .env.example <<EOL
 # Example of .env file
 # 
@@ -267,18 +251,16 @@ else
 fi
 '
 
-npx json -I -f package.json -e "this.scripts.lint=\"eslint 'src/**/*.{ts,tsx}'\"" > /dev/null 2>&1
-npx json -I -f package.json -e "this.scripts['start:dev']='next dev --turbopack'" > /dev/null 2>&1
+npx json -I -f package.json -e "this.scripts.lint=\"eslint 'src/**/*.{ts,tsx}' --fix\"" > /dev/null 2>&1
+npx json -I -f package.json -e "this.scripts['start:dev']='next dev'" > /dev/null 2>&1
 
 # Step 8: Commit changes to Git (if applicable)
-show_progress_during "Committing changes to Git" bash -c '
-  GIT_COMMIT="'"$GIT_COMMIT"'"
-
-  if [ "$GIT_COMMIT" = "yes" ]; then
-      git add --all -- ":!prepare.sh" > /dev/null 2>&1
-      git commit -m "chore: project prepared" > /dev/null 2>&1
-  fi
-'
+if [ "$GIT_COMMIT" = "yes" ]; then
+  show_progress_during "Committing changes to Git" bash -c '
+    git add --all -- ":!prepare.sh" > /dev/null 2>&1
+    git commit -m "chore: project prepared" > /dev/null 2>&1
+  '
+fi
 
 # Final message
 echo "Project prepared successfully!"
