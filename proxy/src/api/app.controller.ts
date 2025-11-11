@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { getEnvString } from 'src/common/utils/env.functions';
 
 import { AppService } from './app.service';
 
@@ -10,12 +11,22 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  private readonly githubRepoUrl = getEnvString('GITHUB_REPOSITORY_URL');
+
   /**
    * Controller to redirect to the github repo
    */
   @Get()
   get(@Res() res: Response) {
-    return res.redirect(process.env.GITHUB_REPOSITORY_URL!);
+    return res.redirect(this.githubRepoUrl);
+  }
+
+  /**
+   * Controller to get api status
+   */
+  @Get('status')
+  async getStatus(@Res() res: Response) {
+    return res.status(200).send({ statusCode: 200, message: 'API is running' });
   }
 
   /**
@@ -23,17 +34,15 @@ export class AppController {
    */
   @Get('*path')
   async getFile(@Res() res: Response, @Param('path') path?: string[]) {
-    const githubRepoUrl = process.env.GITHUB_REPOSITORY_URL!;
-
     if (!path?.length) {
-      return res.redirect(githubRepoUrl);
+      return res.redirect(this.githubRepoUrl);
     }
 
     const fileName = path.at(-1)?.toLowerCase();
     const allowedFileNames = ['prepare.sh', 'prepare.ps1'];
 
     if (!fileName || !allowedFileNames.includes(fileName)) {
-      return res.redirect(githubRepoUrl);
+      return res.redirect(this.githubRepoUrl);
     }
 
     const scriptType = fileName.endsWith('.sh') ? 'bash' : 'powershell';
@@ -41,7 +50,7 @@ export class AppController {
     const buffer = await this.appService.getFileBuffer(filePath);
 
     if (!buffer) {
-      return res.redirect(githubRepoUrl);
+      return res.redirect(this.githubRepoUrl);
     }
 
     const contentTypes: Record<string, string> = {
