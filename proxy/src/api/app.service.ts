@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { getEnvString } from 'src/common/utils/env.functions';
 
 /**
  * Class representing an app service
@@ -9,7 +10,7 @@ export class AppService {
    * Function to get a file buffer from a github repository using a custom path
    */
   async getFileBuffer(filePath: string): Promise<Buffer | null> {
-    const url = `${process.env.GITHUB_REPOSITORY_URL}/raw/main/scripts/${filePath}`;
+    const url = `${getEnvString('GITHUB_REPOSITORY_URL')}/raw/${getEnvString('GITHUB_BRANCH')}/scripts/${filePath}`;
 
     const buffer = await fetch(url).then((res) => {
       if (res.status === 200) {
