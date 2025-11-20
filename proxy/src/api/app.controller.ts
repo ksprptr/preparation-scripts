@@ -39,27 +39,20 @@ export class AppController {
     }
 
     const fileName = path.at(-1)?.toLowerCase();
-    const allowedFileNames = ['prepare.sh', 'prepare.ps1'];
 
-    if (!fileName || !allowedFileNames.includes(fileName)) {
+    if (!fileName || fileName !== 'prepare.sh') {
       return res.redirect(this.githubRepoUrl);
     }
 
-    const scriptType = fileName.endsWith('.sh') ? 'bash' : 'powershell';
-    const filePath = [...path.slice(0, -1), scriptType, fileName].join('/');
+    const filePath = [...path.slice(0, -1), fileName].join('/');
     const buffer = await this.appService.getFileBuffer(filePath);
 
     if (!buffer) {
       return res.redirect(this.githubRepoUrl);
     }
 
-    const contentTypes: Record<string, string> = {
-      bash: 'application/x-sh',
-      powershell: 'application/x-powershell',
-    };
-
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    res.setHeader('Content-Type', contentTypes[scriptType]);
+    res.setHeader('Content-Type', 'application/x-sh');
 
     return res.send(buffer);
   }

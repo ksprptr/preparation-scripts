@@ -1,6 +1,6 @@
-# Next.js Preparation Script
+# NestJS Preparation Script
 
-> Automates the initial setup of a Next.js project by generating structure, configuration, and common utilities.
+> Automates the initial setup of a NestJS project by generating structure, configuration, and common utilities.
 
 > **⚠️ Warning**  
 > This script _modifies and removes files_ in your project.  
@@ -12,7 +12,7 @@
 
 ## When to Run
 
-Run this script **right after creating a new Next.js project** and making your initial `init` commit.  
+Run this script **right after creating a new NestJS project** and making your initial `init` commit.  
 This ensures the script can safely restructure your project without conflicts.
 
 ## Usage
@@ -22,7 +22,7 @@ This ensures the script can safely restructure your project without conflicts.
 > Dependencies: `wget`, `bash`
 
 ```bash
-wget https://scripts.ksprptr.dev/nextjs/prepare.sh && chmod +x prepare.sh && ./prepare.sh
+wget https://scripts.ksprptr.dev/nestjs/prepare.sh && chmod +x prepare.sh && ./prepare.sh
 ```
 
 ### Windows (PowerShell)
@@ -30,7 +30,7 @@ wget https://scripts.ksprptr.dev/nextjs/prepare.sh && chmod +x prepare.sh && ./p
 > Dependencies: `winget`, `Git for Windows` (for `bash` shell)
 
 ```bash
-Invoke-WebRequest -Uri "https://scripts.ksprptr.dev/nextjs/prepare.sh" -OutFile "prepare.sh"
+Invoke-WebRequest -Uri "https://scripts.ksprptr.dev/nestjs/prepare.sh" -OutFile "prepare.sh"
 
 winget install --id Git.Git -e
 
