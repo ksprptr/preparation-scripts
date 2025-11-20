@@ -1,6 +1,6 @@
 {
   "name": "proxy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "API for redirecting to raw preparation scripts from GitHub.",
   "author": "Petr Kašpar",
   "private": true,
